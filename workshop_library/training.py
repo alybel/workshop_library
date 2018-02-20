@@ -114,7 +114,7 @@ def training(
 if __name__ == '__main__':
     from sklearn.linear_model import LinearRegression
 
-    df = pd.read_csv('../../financial_data.csv')
+    df = pd.read_csv('../financial_data.csv')
     result = training(
         df=df,
         backtest_settings={'backtest_method': 'simple_split'},
@@ -124,3 +124,6 @@ if __name__ == '__main__':
         hide_columns=['ret_10d', 'target']
     )
     print(result)
+    from . import financial_backtest
+
+    bt = financial_backtest.SimpleBacktest(prediction_series=result['pred'], )
