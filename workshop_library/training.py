@@ -20,7 +20,7 @@ def get_X_y(df, target_column, hide_columns, date_column):
     return X, y
 
 
-def train_model_and_apply_test(x_train, x_test, y_train, y_test, results, model, round = 0):
+def train_model_and_apply_test(x_train, x_test, y_train, y_test, results, model, round=0):
     """apply training and test"""
     model.fit(x_train, y_train)
     pred = model.predict(x_test)
@@ -29,7 +29,7 @@ def train_model_and_apply_test(x_train, x_test, y_train, y_test, results, model,
     results['prediction'].extend(pred)
     results['truth'].extend(y_test)
     results['date'].extend(x_test.index)
-    results['round'].extend([round]*x_test.shape[0])
+    results['round'].extend([round] * x_test.shape[0])
 
     return results
 
@@ -59,7 +59,6 @@ def training(
     if hide_columns is None:
         hide_columns = []
 
-
     # update the default backtest settings (bs)
     bs = {'backtest_method': 'simple_split', 'split_ratio': 0.7, 'step_size': 10, 'training_window': 1000,
           'test_train_diff_days': 1}
@@ -75,7 +74,7 @@ def training(
         y_train, y_test = y[:cutoff], y[cutoff:]
 
         results = train_model_and_apply_test(x_train=x_train, x_test=x_test, y_train=y_train, y_test=y_test,
-                                             model=model, results=results, round = 0)
+                                             model=model, results=results, round=0)
 
     elif bs['backtest_method'] in ['walk_forward_rolling', 'walk_forward_extending']:
         selection_dates = X.index.unique()
@@ -105,7 +104,7 @@ def training(
                 y_test=y.loc[this_round_test_dates],
                 model=model,
                 results=results,
-                round = i
+                round=i
             )
             i += 1
 
