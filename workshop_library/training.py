@@ -56,6 +56,8 @@ def training(
         raise SystemExit('A target column needs to be provided')
     if model is None:
         raise SystemExit('A valid model needs to be provided')
+    if date_column is None:
+        raise SystemExit('A valid date_column needs to be provided')
     if hide_columns is None:
         hide_columns = []
 
@@ -92,10 +94,6 @@ def training(
             test_end_idx = test_start_idx + bs['step_size']
             this_round_train_dates = selection_dates[train_start_idx:train_end_idx]
             this_round_test_dates = selection_dates[test_start_idx:test_end_idx]
-            print(this_round_train_dates)
-            print(len(this_round_train_dates))
-            print(this_round_test_dates)
-            print(len(this_round_test_dates))
 
             results = train_model_and_apply_test(
                 x_train=X.loc[this_round_train_dates],
