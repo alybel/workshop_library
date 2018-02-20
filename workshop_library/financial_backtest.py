@@ -5,7 +5,7 @@ class Backtest(object):
     def __init__(self, trading_signal=None, underlying_series=None, transaction_cost_in_bp=0,
                  time_periods_per_year=250):
         self.trading_signal = trading_signal
-        self.underlying_series = underlying_series
+        self.underlying_series = underlying_series.loc[self.trading_signal.index]
         self.transaction_cost_in_bp = transaction_cost_in_bp
         self.time_periods_per_year = time_periods_per_year
 
