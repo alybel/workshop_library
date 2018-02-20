@@ -14,9 +14,13 @@ class Backtest(object):
         return self.underlying_series.pct_change()
 
     @property
+    def transaction_costs_per_period(self):
+        return (self.transaction_cost_in_bp / 10000 * np.abs(self.trading_signal.diff())).shift(1).fillna(0)
+
+    @property
     def returns(self):
         r = self.underlying_returns * self.trading_signal.shift(
-            1) - self.trading_signal.diff().abs() * self.transaction_cost_in_bp / 100.
+            1) - self.transaction_costs_per_period
         r[0] = 0
         return r
 

@@ -113,17 +113,46 @@ def training(
 
 if __name__ == '__main__':
     from sklearn.linear_model import LinearRegression
+    from workshop_library import financial_backtest
+    import numpy as np
 
     df = pd.read_csv('../financial_data.csv')
     result = training(
         df=df,
-        backtest_settings={'backtest_method': 'simple_split'},
+        backtest_settings={'backtest_method': 'walk_forward_rolling', 'training_window': 500, 'step_size': 20,
+                           'test_train_diff_days': 1},
         model=LinearRegression(),
         date_column='Date',
         target='ret_1d',
         hide_columns=['ret_10d', 'target']
     )
-    print(result)
-    from . import financial_backtest
 
-    bt = financial_backtest.SimpleBacktest(prediction_series=result['pred'], )
+    bt = financial_backtest.SimpleBacktest(
+        prediction_series=result['prediction'],
+        underlying_series=df['close'],
+        transaction_cost_in_bp=2,
+        is_regr_class='regr'
+    )
+
+    assert np.isclose(bt.sharpe_ratio, 0.00109117874343)
+
+    from sklearn.linear_model import LogisticRegression
+    df['target'] = df['ret_1d'] > 0
+    result2 = training(
+        df=df,
+        backtest_settings={'backtest_method': 'walk_forward_rolling', 'training_window': 500, 'step_size': 20,
+                           'test_train_diff_days': 1},
+        model=LogisticRegression(),
+        date_column='Date',
+        target='target',
+        hide_columns=['ret_10d', 'target', 'ret_1d']
+    )
+
+    bt2 = financial_backtest.SimpleBacktest(
+        prediction_series=result2['prediction'],
+        underlying_series=df['close'],
+        transaction_cost_in_bp=2,
+        is_regr_class='class'
+    )
+
+    assert np.isclose(bt2.sharpe_ratio, -0.400204689504)
