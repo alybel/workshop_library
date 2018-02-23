@@ -24,7 +24,8 @@ def refresh_data_for_symbols():
 
 
 def initialize_data_for_symbols():
-    os.remove(settings.storage_path)
+    if os.path.isfile(settings.storage_path):
+        os.remove(settings.storage_path)
     for key in times:
         data_manager.load_from_store_or_yahoo(start=times[key], end=datetime.date.today(), symbol=key)
         data_manager.add_ti_and_store(key)
