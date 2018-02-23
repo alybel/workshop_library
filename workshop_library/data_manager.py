@@ -9,11 +9,15 @@ import numpy as np
 import pandas as pd
 import pickle
 import os
+from sqlalchemy import create_engine, inspect, text
+
+db = create_engine('sqlite:///%s' % settings.database)
 
 
 def put_to_storage(df=None, name=''):
-    hdf = HDFStore(settings.storage_path)
-    hdf.put(name, df, format='table', data_columns=True)
+    # hdf = HDFStore(settings.storage_path)
+    # hdf.put(name, df, format='table', data_columns=True)
+    df.to_sql(name=name, con=db)
 
 
 def lprint(x):
@@ -33,27 +37,34 @@ def clean_symbol(symbol):
     symbol = symbol.replace('^', '')
     return symbol
 
+def get_available_tickers():
+    inspector = inspect(db)
+    tickers = inspector.get_table_names()
+    return tickers
 
 def load_from_store_or_yahoo(start=None, end=None, symbol=None):
     append = False
-    hdf = HDFStore(settings.storage_path)
+    # hdf = HDFStore(settings.storage_path)
     today = dt.datetime.today().date()
 
     yahoo_symbol = symbol
     symbol = clean_symbol(symbol)
-
+    inspector = inspect(db)
+    tickers = inspector.get_table_names()
     # this case, earlier data than in store is requested. The table needs to be rewritten
-    if symbol in hdf:
-        df = hdf[symbol]
+    if symbol in tickers:
+        df = pd.read_sql_table(con=db, table_name=symbol)  # hdf[symbol]
         start_store = df.index.min()
         if isinstance(start, str):
             start = dt.datetime.strptime(start, '%Y-%m-%d')
         if start_store.date() > start:
-            hdf.remove(symbol)
+            sql = text('DROP TABLE IF EXISTS %s;' % symbol)
+            result = db.execute(sql)
+            # hdf.remove(symbol)
             lprint('start date was earlier than the oldest date in the storage. storage needs to be rewritten.')
 
-    if symbol in hdf:
-        df = hdf[symbol]
+    if symbol in tickers:
+        df = pd.read_sql_table(con=db, table_name=symbol)  # hdf[symbol]
         end_store = df.index.max()
 
         # check if today is a weekend day
@@ -91,16 +102,17 @@ def load_from_store_or_yahoo(start=None, end=None, symbol=None):
 
     # store or append to hdf5 storage
 
-    if symbol in hdf:
+    if symbol in tickers:
         # drop duplicates
-        exist_df = hdf[symbol]
+        exist_df = pd.read_sql_table(con=db, table_name=symbol)
         df = df[~df.index.isin(exist_df.index)]
 
     if append:
-        hdf.append(symbol, df, format='table', data_columns=True)
+        df.to_sql(name=symbol, con=db, if_exists='append')  # .append(symbol, df, format='table', data_columns=True)
     else:
         df.drop_duplicates(inplace=True)
-        hdf.put(symbol, df, format='table', data_columns=True)
+        df.to_sql(name=symbol, con=db)
+        #hdf.put(symbol, df, format='table', data_columns=True)
     if not df.index.is_unique:
         lprint('index of %s is not unique' % symbol)
     return df
@@ -123,9 +135,9 @@ def get_past_5y_of_data(symbol):
 
 def get_symbol(symbol):
     symbol = clean_symbol(symbol)
-    hdf = HDFStore(settings.storage_path)
-    if symbol in hdf:
-        return hdf[symbol]
+    #hdf = HDFStore(settings.storage_path)
+    if symbol in get_available_tickers():
+        return pd.read_sql_table(table_name=symbol, con=db)
     else:
         print('data from %s not in storage. You might want to load it with e.g. '
               'utils.get_past_10y_of_data(symbol)' % symbol)
@@ -141,13 +153,14 @@ def add_ti_and_store(symbol):
 
 def get_tsymbol(symbol):
     symbol = clean_symbol(symbol)
-    hdf = HDFStore(settings.storage_path)
+    #hdf = HDFStore(settings.storage_path)
     tsym = 't_%s' % symbol
     lprint('loaded %s from ti storage' % symbol)
-    if tsym in hdf:
-        return hdf[tsym]
+    if tsym in get_available_tickers():
+        return pd.read_sql_table(table_name=tsym, con=db)
     else:
         return add_ti_and_store(symbol)
+
 
 def see_if_in_cache(key):
     fn = os.path.join(settings.data_path, key + '.pkl')
@@ -247,8 +260,6 @@ def add_technical_indicators(
         indicators.append('ret_%dd' % p)
 
     return h_data
-
-
 
 
 def join_unemployment_data(df):
