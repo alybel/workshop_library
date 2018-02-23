@@ -1,7 +1,12 @@
 import seaborn as sns
 
-sns.set_style('darkgrid')
-sns.set_context('talk')
+sns.set_style('darkgrid', {"axes.facecolor": ".9"})
+sns.set_context('poster')
+
+flatui = ["#34495e", "#2ecc71"]
+sns.set_palette(sns.color_palette(flatui))
+
+
 import pylab
 import warnings
 

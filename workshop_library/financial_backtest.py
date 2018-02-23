@@ -50,8 +50,10 @@ class SimpleBacktest(Backtest):
                  prediction_series=None,
                  underlying_series=None,
                  transaction_cost_in_bp=0,
-                 is_regr_class='class'
+                 is_regr_class=None
                  ):
+        if is_regr_class is None:
+            raise Exception('is_class_regr needs to be provided')
         underlying_series = underlying_series.loc[prediction_series.index]
         trading_signal = 2 * (prediction_series > 0) - 1 if is_regr_class == 'regr' else 2 * (
                 prediction_series > 0.5) - 1
