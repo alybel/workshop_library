@@ -11,7 +11,9 @@ times = {
     '^VIX': datetime.date(1980, 1, 1),
     'EURUSD=x': datetime.date(1994, 1, 1),
     '^STOXX50E': datetime.date(1990, 1, 1),
-    '^N225': datetime.date(1990, 1, 1)
+    '^N225': datetime.date(1990, 1, 1),
+    'AAPL': datetime.date(1990, 1, 1),
+    'MSFT': datetime.date(1990, 1, 1),
 }
 
 
