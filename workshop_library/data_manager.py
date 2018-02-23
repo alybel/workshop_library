@@ -146,7 +146,9 @@ def get_symbol(symbol):
     symbol = clean_symbol(symbol)
     # hdf = HDFStore(settings.storage_path)
     if symbol in get_available_tickers():
-        return pd.read_sql_table(table_name=symbol, con=db)
+        df = pd.read_sql_table(table_name=symbol, con=db)
+        df = df.set_index('Date')
+        return df
     else:
         print('data from %s not in storage. You might want to load it with e.g. '
               'utils.get_past_10y_of_data(symbol)' % symbol)
@@ -166,7 +168,9 @@ def get_tsymbol(symbol):
     tsym = 't_%s' % symbol
     lprint('loaded %s from ti storage' % symbol)
     if tsym in get_available_tickers():
-        return pd.read_sql_table(table_name=tsym, con=db)
+        df = pd.read_sql_table(table_name=tsym, con=db)
+        df.set_index('Date')
+        return df
     else:
         return add_ti_and_store(symbol)
 
