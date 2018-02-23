@@ -253,7 +253,7 @@ def add_technical_indicators(
 
 def join_unemployment_data(df):
     # Join additional data sources, e.g. unemployment, gold as an indicator for demand of security, Short-Term and Long Term Bond Yields
-    unemployment = pd.read_csv(os.path.join(settings.data_path, 'DP_LIVE_18012018171856485.csv'))
+    unemployment = pd.read_csv(os.path.join(settings.data_path, 'unemployment_data.csv'))
     # select monthly US unemployment as relative to workforce figure
     unemployment = unemployment[
         (unemployment.LOCATION == 'USA') & (unemployment.SUBJECT == 'TOT') & (unemployment.MEASURE == 'PC_LF') & (
