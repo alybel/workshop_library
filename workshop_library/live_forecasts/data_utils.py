@@ -19,13 +19,13 @@ def refresh_data_for_symbols():
     symbols = times.keys()
     for symbol in symbols:
         print('loading %s' % symbol)
-        utils.get_past_5y_of_data(symbol)
-        utils.add_ti_and_store(symbol)
+        data_manager.get_past_5y_of_data(symbol)
+        data_manager.add_ti_and_store(symbol)
 
 
 def initialize_data_for_symbols():
     os.remove(settings.storage_path)
     for key in times:
-        utils.load_from_store_or_yahoo(start=times[key], end=datetime.date.today(), symbol=key)
-        utils.add_ti_and_store(key)
+        data_manager.load_from_store_or_yahoo(start=times[key], end=datetime.date.today(), symbol=key)
+        data_manager.add_ti_and_store(key)
         print(key)
