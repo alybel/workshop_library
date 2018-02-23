@@ -14,10 +14,15 @@ from sqlalchemy import create_engine, inspect, text
 db = create_engine('sqlite:///%s' % settings.database)
 
 
+def ticker_to_db(df, name):
+    df.reset_index(inplace=True)
+    df.to_sql(name=name, con=db, index=False)
+
+
 def put_to_storage(df=None, name=''):
     # hdf = HDFStore(settings.storage_path)
     # hdf.put(name, df, format='table', data_columns=True)
-    df.to_sql(name=name, con=db)
+    ticker_to_db(df=df, name=name)
 
 
 def lprint(x):
@@ -37,10 +42,12 @@ def clean_symbol(symbol):
     symbol = symbol.replace('^', '')
     return symbol
 
+
 def get_available_tickers():
     inspector = inspect(db)
     tickers = inspector.get_table_names()
     return tickers
+
 
 def load_from_store_or_yahoo(start=None, end=None, symbol=None):
     append = False
@@ -108,11 +115,13 @@ def load_from_store_or_yahoo(start=None, end=None, symbol=None):
         df = df[~df.index.isin(exist_df.index)]
 
     if append:
-        df.to_sql(name=symbol, con=db, if_exists='append')  # .append(symbol, df, format='table', data_columns=True)
+        df.reset_index(inplace=True)
+        df.to_sql(name=symbol, con=db, if_exists='append',
+                  index=False)
     else:
         df.drop_duplicates(inplace=True)
-        df.to_sql(name=symbol, con=db)
-        #hdf.put(symbol, df, format='table', data_columns=True)
+        ticker_to_db(df=df, name=symbol)
+        # hdf.put(symbol, df, format='table', data_columns=True)
     if not df.index.is_unique:
         lprint('index of %s is not unique' % symbol)
     return df
@@ -135,7 +144,7 @@ def get_past_5y_of_data(symbol):
 
 def get_symbol(symbol):
     symbol = clean_symbol(symbol)
-    #hdf = HDFStore(settings.storage_path)
+    # hdf = HDFStore(settings.storage_path)
     if symbol in get_available_tickers():
         return pd.read_sql_table(table_name=symbol, con=db)
     else:
@@ -153,7 +162,7 @@ def add_ti_and_store(symbol):
 
 def get_tsymbol(symbol):
     symbol = clean_symbol(symbol)
-    #hdf = HDFStore(settings.storage_path)
+    # hdf = HDFStore(settings.storage_path)
     tsym = 't_%s' % symbol
     lprint('loaded %s from ti storage' % symbol)
     if tsym in get_available_tickers():
