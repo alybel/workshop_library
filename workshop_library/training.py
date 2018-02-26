@@ -1,6 +1,6 @@
 import pandas as pd
 from collections import defaultdict
-
+from . import utils
 
 def get_X_y(df, target_column, hide_columns, date_column):
     """preapre X and y data from the provided information"""
@@ -34,6 +34,8 @@ def train_model_and_apply_test(x_train, x_test, y_train, y_test, results, model,
     return results
 
 
+
+
 def training(
         df=None,
         backtest_settings=None,
@@ -54,6 +56,8 @@ def training(
 
     if target is None:
         raise SystemExit('A target column needs to be provided')
+    if target not in df:
+        raise SystemExit('Target Column not found on dataframe')
     if model is None:
         raise SystemExit('A valid model needs to be provided')
     if date_column is None:
@@ -61,9 +65,17 @@ def training(
     if hide_columns is None:
         hide_columns = []
 
+    model_hash = utils.get_model_hash(df, backtest_settings, target, hide_columns, model, date_column)
+    ma = utils.ModelAdmin()
+    model_exists = ma.load_model_if_exists(model_hash)
+    if model_exists is not None:
+        return model_exists
+
     # update the default backtest settings (bs)
     bs = {'backtest_method': 'simple_split', 'split_ratio': 0.7, 'step_size': 10, 'training_window': 1000,
           'test_train_diff_days': 1}
+    if backtest_settings is None:
+        backtest_settings = {}
     bs.update(backtest_settings)
 
     X, y = get_X_y(df=df, date_column=date_column, hide_columns=hide_columns, target_column=target)
@@ -108,6 +120,9 @@ def training(
 
     res_df = pd.DataFrame({'prediction': results['prediction'], 'truth': results['truth'], 'round': results['round']},
                           index=results['date'])
+    print(model_hash)
+
+    ma.write_to_store(model_hash=model_hash, model=res_df)
     return res_df
 
 
