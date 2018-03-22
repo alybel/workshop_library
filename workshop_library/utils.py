@@ -40,7 +40,7 @@ class ModelAdmin(object):
 
     def write_to_store(self, model_hash, model):
         if os.path.exists(self.model_store):
-            keyval_store = pickle.load(open(self.model_store, 'wb'))
+            keyval_store = pickle.load(open(self.model_store, 'rb'))
         else:
             keyval_store = {}
         if model_hash in keyval_store:
