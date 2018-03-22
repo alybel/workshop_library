@@ -26,11 +26,10 @@ def get_model_hash(df, *args):
 
 
 class ModelAdmin(object):
-    def __init__(self, model_store='models.db'):
+    def __init__(self, model_store='models.db' if not settings.model_store else settings.model_store):
         self.model_store = model_store
 
     def load_model_if_exists(self, model_hash):
-
         if os.path.exists(self.model_store):
             keyval_store = pickle.load(open(self.model_store, 'rb'))
             if model_hash in keyval_store:
