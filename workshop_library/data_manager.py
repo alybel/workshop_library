@@ -169,7 +169,7 @@ def get_tsymbol(symbol):
     lprint('loaded %s from ti storage' % symbol)
     if tsym in get_available_tickers():
         df = pd.read_sql_table(table_name=tsym, con=db)
-        df.set_index('Date')
+        df = df.set_index('Date')
         return df
     else:
         return add_ti_and_store(symbol)
