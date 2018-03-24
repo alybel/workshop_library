@@ -1,5 +1,5 @@
 import numpy as np
-
+import pandas as pd
 
 class Backtest(object):
     def __init__(self, trading_signal=None, underlying_series=None, transaction_cost_in_bp=0,
@@ -55,9 +55,12 @@ class SimpleBacktest(Backtest):
                  ):
         if is_regr_class is None:
             raise Exception('is_class_regr needs to be provided')
-        underlying_series = underlying_series.loc[prediction_series.index]
+
         if trading_signal is None:
             trading_signal = 2 * (prediction_series > 0) - 1 if is_regr_class == 'regr' else 2 * (
                 prediction_series > 0.5) - 1
+        if not isinstance(trading_signal, pd.Series):
+            trading_signal = pd.Series(trading_signal, index=prediction_series.index)
+        underlying_series = underlying_series.loc[trading_signal.index]
         Backtest.__init__(self, trading_signal=trading_signal, underlying_series=underlying_series,
                           transaction_cost_in_bp=transaction_cost_in_bp)
