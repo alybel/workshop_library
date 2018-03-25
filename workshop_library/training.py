@@ -99,7 +99,9 @@ def training(
 
         test_start_idx = bs['training_window'] + bs['test_train_diff_days']
         i = 0
+        i_max = (df.shape[0] - bs['training_window'] - bs['test_train_diff_days']) / bs['step_size']
         while test_start_idx < df.shape[0] - bs['step_size']:
+            print('%1.2f %%' % (100*i/i_max), end='\r')
             train_start_idx = 0 if bs['backtest_method'] == 'walk_forward_extending' else bs['step_size'] * i
             train_end_idx = bs['training_window'] + i * bs['step_size']
             test_start_idx = train_end_idx + bs['test_train_diff_days']
