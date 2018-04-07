@@ -86,6 +86,9 @@ def training(
 
     X, y = get_X_y(df=df, date_column=date_column, hide_columns=hide_columns, target_column=target)
 
+    if X.shape[0] < bs['training_window']:
+        raise AttributeError('Your training window is longer than available data')
+
     results = defaultdict(list)
 
     if bs['backtest_method'] == 'simple_split':

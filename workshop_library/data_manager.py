@@ -244,6 +244,7 @@ def add_technical_indicators(
          'rsi_30', 'rsi_3', 'dma', 'cci', 'kdjd', 'pdi', 'dx']
     h_data = df.copy()
 
+
     # rename columns such that they match the olhcv paradigm from yahoo
     if col_names_for_olhcv:
         rename_dict = {}
