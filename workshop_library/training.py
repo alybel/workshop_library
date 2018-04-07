@@ -23,7 +23,11 @@ def get_X_y(df, target_column, hide_columns, date_column):
 def train_model_and_apply_test(x_train, x_test, y_train, y_test, results, model, round=0):
     """apply training and test"""
     model.fit(x_train, y_train)
-    pred = model.predict(x_test)
+    pred = None
+    if hasattr(model, 'predict_proba'):
+        pred = model.predict_proba(x_test)[:,1]
+    else:
+        pred = model.predict(x_test)
     if len(pred.shape) == 2:
         pred = pred[:, 1]
     results['prediction'].extend(pred)
