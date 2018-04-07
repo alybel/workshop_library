@@ -47,6 +47,7 @@ def training(
         hide_columns=None,
         model=None,
         date_column=None,
+        load_model_if_exists = True
 ):
     """
     Have several training methods available, all are time-series consistent.
@@ -72,7 +73,7 @@ def training(
     model_hash = utils.get_model_hash(df, backtest_settings, target, hide_columns, model, date_column)
     ma = utils.ModelAdmin()
     model_exists = ma.load_model_if_exists(model_hash)
-    if model_exists is not None:
+    if model_exists is not None and load_model_if_exists:
         return model_exists
 
     # update the default backtest settings (bs)
