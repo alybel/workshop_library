@@ -1,7 +1,7 @@
 import os
 import shutil
 
-participants = ['Test Teilnehmer 1']
+participants = ['Test%d' % i for i in range(10)]
 contents = ['Introduction to Python in Jupyter Notebooks.ipynb']
 
 for participant in participants:
