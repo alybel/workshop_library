@@ -9,5 +9,6 @@ for participant in participants:
     os.makedirs(dest_folder, exist_ok=True)
     print('Copying Files for %s' % participant)
     for content in contents:
-        shutil.copyfile(src='/home/user/Workshop/AlexanderBeck/%s' % content,
-                        dst='%s/%s' % (dest_folder, content))
+        source = '/home/user/Workshop/AlexanderBeck/%s' % content
+        print(source)
+        shutil.copyfile(src=source, dst='%s/%s' % (dest_folder, content))
