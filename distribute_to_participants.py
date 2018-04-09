@@ -6,7 +6,7 @@ contents = ['Introduction to Python in Jupyter Notebooks.ipynb']
 
 for participant in participants:
     dest_folder = '/home/user/Workshop/%s' % participant.replace(' ', '\ ')
-    os.makedirs(dest_folder)
+    os.makedirs(dest_folder, exist_ok=True)
     print('Copying Files for %s' % participant)
     for content in contents:
         shutil.copyfile(src='/home/user/Workshop/Alexander\\ Beck/%s' % content.replace(' ', '\ '),
