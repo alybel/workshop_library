@@ -2,7 +2,7 @@ import os
 import shutil
 
 participants = ['Test%d' % i for i in range(10)]
-contents = ['Introduction to Python in Jupyter Notebooks.ipynb', 'Building a trading strategy.pynb']
+contents = ['Introduction to Python in Jupyter Notebooks.ipynb', 'Building a trading strategy.ipynb']
 
 for participant in participants:
     dest_folder = '/home/user/Workshop/%s' % participant
