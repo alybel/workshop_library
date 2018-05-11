@@ -1,8 +1,27 @@
 import os
 import shutil
 
-participants = ['Test%d' % i for i in range(10)]
-contents = ['Introduction to Python in Jupyter Notebooks.ipynb', 'Building a trading strategy.ipynb']
+participants = ['Guest_%d' % i for i in range(5)]
+participants.extend([
+    'Bernhard Breloer',
+    'Alexandar Cherkezov',
+    'Carsten Rother',
+    'Tilman Krempel',
+    'Egon Gemmel',
+    'Herbert Nachbagauer',
+    'Kai Kauffmann',
+    'Albert Reicherzer',
+    'Patrick Seidel',
+    'Philipp Cremer'
+])
+
+contents = [
+    'Introduction to Python in Jupyter Notebooks.ipynb',
+    'Building a trading strategy.ipynb',
+    'A first and very simple machine learning model.ipynb',
+    'Data processing and feature engineering.ipynb',
+    'Forecast Success Simulator.ipynb',
+]
 
 for participant in participants:
     dest_folder = '/home/user/Workshop/%s' % participant
