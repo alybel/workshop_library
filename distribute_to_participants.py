@@ -12,7 +12,8 @@ participants.extend([
     'Kai Kauffmann',
     'Albert Reicherzer',
     'Patrick Seidel',
-    'Philipp Cremer'
+    'Philipp Cremer',
+    'Knut Kuehnhausen'
 ])
 
 contents = [
