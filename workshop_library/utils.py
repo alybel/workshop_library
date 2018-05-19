@@ -26,7 +26,7 @@ def get_model_hash(df, *args):
 
 
 class ModelAdmin(object):
-    def __init__(self, model_store='models.db' if not settings.model_store else settings.model_store):
+    def __init__(self, model_store='models.db' if not hasattr(settings, 'model_store') else settings.model_store):
         self.model_store = model_store
 
     def load_model_if_exists(self, model_hash):

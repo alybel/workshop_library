@@ -1,10 +1,8 @@
-import pandas_datareader.data as pdd
 import datetime as dt
 from pandas import HDFStore
 import time
 from . import settings
 import stockstats as ss
-from pandas_datareader._utils import RemoteDataError
 import numpy as np
 import pandas as pd
 import pickle
@@ -32,6 +30,20 @@ def lprint(x):
 def get_yahoo_data(start=None, end=None, symbol=None):
     return pdd.DataReader(symbol, 'yahoo', start=start, end=end)
 
+from alpha_vantage.timeseries import TimeSeries
+def get_alphavantage_historic_data(symbol=None):
+    if symbol is None:
+        symbol = 'MSFT'
+    ts = TimeSeries(output_format='pandas', indexing_type='date')
+    return ts.get_daily_adjusted(symbol=symbol, outputsize='full')
+
+
+def get_alphavantage_compact_data(symbol=None):
+    if symbol is None:
+        symbol = 'MSFT'
+    ts = TimeSeries(output_format='pandas', indexing_type='date')
+    return ts.get_daily_adjusted(symbol=symbol, outputsize='compact')
+
 
 def get_yahoo_quote(symbol=None):
     return pdd.get_quote_google(symbol)
@@ -47,84 +59,6 @@ def get_available_tickers():
     inspector = inspect(db)
     tickers = inspector.get_table_names()
     return tickers
-
-
-def load_from_store_or_yahoo(start=None, end=None, symbol=None):
-    append = False
-    # hdf = HDFStore(settings.storage_path)
-    today = dt.datetime.today().date()
-
-    yahoo_symbol = symbol
-    symbol = clean_symbol(symbol)
-    inspector = inspect(db)
-    tickers = inspector.get_table_names()
-    # this case, earlier data than in store is requested. The table needs to be rewritten
-    if symbol in tickers:
-        df = pd.read_sql_table(con=db, table_name=symbol)  # hdf[symbol]
-        start_store = df.index.min()
-        if isinstance(start, str):
-            start = dt.datetime.strptime(start, '%Y-%m-%d')
-        if start_store.date() > start:
-            sql = text('DROP TABLE IF EXISTS %s;' % symbol)
-            result = db.execute(sql)
-            # hdf.remove(symbol)
-            lprint('start date was earlier than the oldest date in the storage. storage needs to be rewritten.')
-
-    if symbol in tickers:
-        df = pd.read_sql_table(con=db, table_name=symbol)  # hdf[symbol]
-        end_store = df.index.max()
-
-        # check if today is a weekend day
-        weekday = dt.datetime.today().weekday()
-        last_trading_day = today
-        if weekday in [5, 6]:
-            correction = 1 if weekday == 5 else 2
-            last_trading_day = today - dt.timedelta(correction)
-
-        # if the last trading day is the max date in the store than do not reload data
-        if last_trading_day == end_store.date():
-            lprint('loaded %s data from storage.' % symbol)
-            return df
-
-        # if the last trading is younger that the last trading day, load the difference
-        end = today + dt.timedelta(1)
-        start = end_store
-        append = True
-
-    # if no store was found, use the start and end from above
-    df = None
-    count = 0
-    while df is None and count < 10:
-        try:
-            df = get_yahoo_data(start=start, end=end, symbol=yahoo_symbol)
-        except RemoteDataError:
-            time.sleep(10 + int(np.random.rand() * 10))
-        count += 1
-
-    if df is None:
-        raise Exception('Even after 10 trials data could not be loaded from yahoo')
-
-    # remove blanks in the header
-    df.columns = [x.replace(' ', '_') for x in df.columns]
-
-    # store or append to hdf5 storage
-
-    if symbol in tickers:
-        # drop duplicates
-        exist_df = pd.read_sql_table(con=db, table_name=symbol)
-        df = df[~df.index.isin(exist_df.index)]
-
-    if append:
-        df.reset_index(inplace=True)
-        df.to_sql(name=symbol, con=db, if_exists='append',
-                  index=False)
-    else:
-        df.drop_duplicates(inplace=True)
-        ticker_to_db(df=df, name=symbol)
-        # hdf.put(symbol, df, format='table', data_columns=True)
-    if not df.index.is_unique:
-        lprint('index of %s is not unique' % symbol)
-    return df
 
 
 # function to get the past 10y of daily data
