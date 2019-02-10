@@ -1,5 +1,0 @@
-setuptools
-numpy
-pandas
-matplotlib
-alpha_vantage
